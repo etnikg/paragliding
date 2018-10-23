@@ -2,8 +2,9 @@ package main
 
 import (
 	"context"
-	"log" //"html/template"
-	//"path/filepath"
+	"log"
+	"strings"
+	"time"
 
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/bson/objectid"
@@ -11,16 +12,7 @@ import (
 	"github.com/mongodb/mongo-go-driver/mongo/findopt"
 )
 
-// *** MONGO *** //
-
-// ObjectID used in MongoDB
-type ObjectID [12]byte
-
-// Counter struct
-type Counter struct {
-	ID      objectid.ObjectID `bson:"_id"`
-	Counter int               `bson:"counter"`
-}
+// *** DB METHODS *** //
 
 func mongoConnect() *mongo.Client {
 	// Connect to MongoDB
@@ -61,6 +53,89 @@ func urlInMongo(url string, trackColl *mongo.Collection) bool {
 	return true
 }
 
+// Get track
+func getTrack(client *mongo.Client, url string) Track {
+	db := client.Database("igcFiles")     // `paragliding` Database
+	collection := db.Collection("tracks") // `track` Collection
+
+	cursor, err := collection.Find(context.Background(),
+		bson.NewDocument(bson.EC.String("url", url)))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	resTrack := Track{}
+
+	for cursor.Next(context.Background()) {
+		err := cursor.Decode(&resTrack)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	return resTrack
+
+}
+
+// Delete all tracks
+func deleteAllTracks(client *mongo.Client) {
+	db := client.Database("igcFiles")
+	collection := db.Collection("tracks")
+
+	// Delete the tracks
+	collection.DeleteMany(context.Background(), bson.NewDocument())
+}
+
+// *** URANI MONGO *** //
+
+// *** URANI MONGO *** //
+
+// *** URANI MONGO *** //
+// Count all tracks
+func countAllTracks(client *mongo.Client) int64 {
+	db := client.Database("igcFiles")
+	collection := db.Collection("tracks")
+
+	// Count the tracks
+	count, _ := collection.Count(context.Background(), nil, nil)
+
+	return count
+}
+
+// Return track names
+// And also t_stop track
+func returnTracks(n int) (string, time.Time) {
+	var response string
+	var tStop time.Time
+
+	conn := mongoConnect()
+
+	resultTracks := getAllTracks(conn, true)
+
+	for key, val := range resultTracks { // Go through the slice
+		response += `"` + val.ID + `",`
+		if key == n-1 || key == len(resultTracks)-1 {
+			tStop = val.TimeRecorded
+			break
+		}
+	}
+
+	// Get rid of that last `,` of JSON will freak out
+	response = strings.TrimRight(response, ",")
+
+	return response, tStop
+}
+
+// ObjectID used in MongoDB
+type ObjectID [12]byte
+
+// Counter struct
+type Counter struct {
+	ID      objectid.ObjectID `bson:"_id"`
+	Counter int               `bson:"counter"`
+}
+
 // Get trackName from URL
 func trackNameFromURL(url string, trackColl *mongo.Collection) string {
 	// Get the trackName
@@ -82,7 +157,6 @@ func trackNameFromURL(url string, trackColl *mongo.Collection) string {
 		}
 	}
 
-	// TODO : i changed from dbResult.TrackName to this... edit this accordingly
 	return dbResult.Url
 }
 
@@ -129,11 +203,12 @@ func increaseTrackCounter(cnt int32, db *mongo.Database) {
 
 // Get all tracks
 func getAllTracks(client *mongo.Client, points bool) []Track {
-	db := client.Database("paragliding")  // `paragliding` Database
+	db := client.Database("igcFiles")     // `paragliding` Database
 	collection := db.Collection("tracks") // `track` Collection
 
 	var cursor mongo.Cursor
 	var err error
+
 	// If points boolean is true
 	// Get the points for the track also
 	// Otherwise don't
@@ -166,41 +241,4 @@ func getAllTracks(client *mongo.Client, points bool) []Track {
 	}
 
 	return resTracks
-}
-
-// Get track
-func getTrack(client *mongo.Client, url string) Track {
-	db := client.Database("igcFiles")     // `paragliding` Database
-	collection := db.Collection("tracks") // `track` Collection
-
-	cursor, err := collection.Find(context.Background(), bson.NewDocument(bson.EC.String("url", url)))
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	resTrack := Track{}
-
-	for cursor.Next(context.Background()) {
-		err := cursor.Decode(&resTrack)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	return resTrack
-
-}
-
-// Delete all tracks
-func deleteAllTracks(client *mongo.Client) {
-	db := client.Database("paragliding")  // `paragliding` Database
-	collection := db.Collection("tracks") // `track` Collection
-
-	// Delete the tracks
-	collection.DeleteMany(context.Background(), bson.NewDocument())
-
-	// Reset the track counter
-	increaseTrackCounter(int32(0), db)
-
 }

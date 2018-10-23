@@ -48,6 +48,11 @@ func searchMap(x map[int]string, y string) int {
 	return -1
 }
 
+func FloatToString(input_num float64) string {
+	// to convert a float number to a string
+	return strconv.FormatFloat(input_num, 'f', 4, 64)
+}
+
 type _url struct {
 	URL string `json:"url"`
 }
@@ -66,10 +71,11 @@ func trackLength(track igc.Track) float64 {
 
 //Track structure: This is structure for storing the track and to access their's id
 type Track struct {
-	ID        string    `json:"id"`
-	Url       string    `json:"url"`
-	Timestamp string    `json:"timestamp"`
-	IgcTrack  igc.Track `json:"igc_track"`
+	ID  string `json:"id"`
+	Url string `json:"url"`
+	//	Timestamp string    `json:"timestamp"`
+	IgcTrack     igc.Track `json:"igc_track"`
+	TimeRecorded time.Time `json:"time_recorded"`
 }
 
 //Attributes : the info about each igc file via id
@@ -184,8 +190,11 @@ func handler2(w http.ResponseWriter, r *http.Request) {
 			//mapID = searchMap(urlMap, URL.URL)
 			ID := rand.Intn(1000)
 
-			track, _ := igc.ParseLocation(URL.URL)
-
+			track, err := igc.ParseLocation(URL.URL)
+			if err != nil {
+				fmt.Fprintln(w, "Error made: ", err)
+				return
+			}
 			//uniqueId = ID
 			//urlMap[uniqueId] = URL.URL
 			igcFile := Track{}
@@ -193,7 +202,9 @@ func handler2(w http.ResponseWriter, r *http.Request) {
 			igcFile.IgcTrack = track
 			igcFile.Url = URL.URL
 
-			igcFile.Timestamp = time.Now().String()
+			timestamp := time.Now().Second()
+			timestamp = timestamp * 1000
+			igcFile.TimeRecorded = time.Now()
 
 			client := mongoConnect()
 
@@ -249,16 +260,36 @@ func handler3(w http.ResponseWriter, r *http.Request) {
 
 	attributes := &Attributes{}
 
-	for i := range igcFiles {
+	client := mongoConnect()
 
-		if igcFiles[i].ID == idURL["id"] {
-			attributes.HeaderDate = igcFiles[i].IgcTrack.Header.Date.String()
-			attributes.Pilot = igcFiles[i].IgcTrack.Pilot
-			attributes.Glider = igcFiles[i].IgcTrack.GliderType
-			attributes.GliderID = igcFiles[i].IgcTrack.GliderID
-			attributes.Length = trackLength(igcFiles[i].IgcTrack)
+	collection := client.Database("igcFiles").Collection("tracks")
+
+	cursor, err := collection.Find(context.Background(), nil, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// 'Close' the cursor
+	defer cursor.Close(context.Background())
+
+	track := Track{}
+
+	for cursor.Next(context.Background()) {
+		err = cursor.Decode(&track)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if track.ID == idURL["id"] {
+			attributes.HeaderDate = track.IgcTrack.Header.Date.String()
+			attributes.Pilot = track.IgcTrack.Pilot
+			attributes.Glider = track.IgcTrack.GliderType
+			attributes.GliderID = track.IgcTrack.GliderID
+			attributes.Length = trackLength(track.IgcTrack)
+			attributes.TrackUrl = track.Url
 
 			json.NewEncoder(w).Encode(attributes)
+			return
 		}
 		//Handling if user type different id from ids stored
 
@@ -280,24 +311,42 @@ func handler4(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "400 - Bad Request, wrong parameters", http.StatusBadRequest)
 		return
 	}
+	client := mongoConnect()
 
-	for i := range igcFiles {
+	collection := client.Database("igcFiles").Collection("tracks")
 
-		if igcFiles[i].ID == urlFields["id"] {
+	cursor, err := collection.Find(context.Background(), nil, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer cursor.Close(context.Background())
+
+	track := Track{}
+
+	for cursor.Next(context.Background()) {
+		err = cursor.Decode(&track)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if track.ID == urlFields["id"] {
 			switch {
 			case urlFields["field"] == "pilot":
-				json.NewEncoder(w).Encode(igcFiles[i].IgcTrack.Pilot)
+				json.NewEncoder(w).Encode(track.IgcTrack.Pilot)
 			case urlFields["field"] == "glider":
-				json.NewEncoder(w).Encode(igcFiles[i].IgcTrack.GliderType)
+				json.NewEncoder(w).Encode(track.IgcTrack.GliderType)
 
 			case urlFields["field"] == "glider_id":
-				json.NewEncoder(w).Encode(igcFiles[i].IgcTrack.GliderID)
+				json.NewEncoder(w).Encode(track.IgcTrack.GliderID)
 
 			case urlFields["field"] == "track_length":
-				json.NewEncoder(w).Encode(trackLength(igcFiles[i].IgcTrack))
+				json.NewEncoder(w).Encode(FloatToString(trackLength(track.IgcTrack)))
 
 			case urlFields["field"] == "h_date":
-				json.NewEncoder(w).Encode(igcFiles[i].IgcTrack.Header.Date.String())
+				json.NewEncoder(w).Encode(track.IgcTrack.Header.Date.String())
+			case urlFields["field"] == "track_src_url":
+				json.NewEncoder(w).Encode(track.Url)
 
 			default:
 				http.Error(w, "400 - Bad Request, the field you entered is not on our database!", http.StatusBadRequest)

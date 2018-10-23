@@ -14,6 +14,86 @@ const (
 	gmlCPC = `",`
 )
 
+// Timestamps for ticker API struct
+type Timestamps struct {
+	latestTimestamp      time.Time
+	oldestTimestamp      time.Time
+	oldestNewerTimestamp time.Time
+}
+
+// Return the latest timestamp
+func latestTimestamp(resultTracks []Track) time.Time {
+	var latestTimestamp time.Time // Create a variable to store the most recent track added
+
+	for _, val := range resultTracks { // Iterate every track to find the most recent track added
+		if val.TimeRecorded.After(latestTimestamp) { // If current track timestamp is after the current latestTimestamp...
+			latestTimestamp = val.TimeRecorded // Set that one as the latestTimestamp
+		}
+	}
+
+	return latestTimestamp
+}
+
+// Return the oldest timestamp
+func oldestTimestamp(resultTracks []Track) time.Time {
+
+	// Just the first time, add the first found timestamp
+	// After that, check that one against the other timestamps in the slice
+	// If there is none, JSON response will be an empty string ""
+	// If there is one timestamp, that one is the oldest timestamp as well
+
+	var oldestTimestamp time.Time // Create a variable to store the oldest track added
+
+	for key, val := range resultTracks { // Iterate every track to find the oldest track added
+
+		// Assign to oldestTimestamp a value, but just once
+		// Then we check it against other timestamps of other tracks in the slice
+		if key == 0 {
+			oldestTimestamp = val.TimeRecorded
+		}
+
+		if val.TimeRecorded.Before(oldestTimestamp) { // If current track timestamp is before the current latestTimestamp...
+			oldestTimestamp = val.TimeRecorded // Set that one as the latestTimestamp
+		}
+	}
+
+	return oldestTimestamp
+}
+
+// Return the oldest timestamp which is newer than input timestamp
+func oldestNewerTimestamp(inputTS string, resultTracks []Track) time.Time {
+
+	ts := time.Now()
+	testTs := ts
+
+	parsedTime, _ := time.Parse("02.01.2006 15:04:05.000", inputTS) // Parse the string into time
+
+	for _, val := range resultTracks { // Iterate every track to find the most recent track added
+		if val.TimeRecorded.After(parsedTime) && val.TimeRecorded.Before(ts) { // If current track timestamp is after the current latestTimestamp...
+			ts = val.TimeRecorded // Set that one as the latestTimestamp
+		}
+	}
+
+	if testTs.Equal(ts) {
+		return time.Time{}
+	}
+
+	return ts
+}
+
+func tickerTimestamps(inputTS string) Timestamps {
+	conn := mongoConnect()
+	resultTracks := getAllTracks(conn, true)
+
+	timestamps := Timestamps{}
+
+	timestamps.latestTimestamp = latestTimestamp(resultTracks)
+	timestamps.oldestTimestamp = oldestTimestamp(resultTracks)
+	timestamps.oldestNewerTimestamp = oldestNewerTimestamp(inputTS, resultTracks)
+
+	return timestamps
+}
+
 func getApiTickerLatest(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodGet { // The request has to be of GET type
@@ -141,84 +221,4 @@ func getApiTickerTimestamp(w http.ResponseWriter, r *http.Request) {
 	} else {
 		w.WriteHeader(http.StatusNotFound) // If it isn't, send a 404 Not Found status
 	}
-}
-
-// Timestamps for ticker API struct
-type Timestamps struct {
-	latestTimestamp      time.Time
-	oldestTimestamp      time.Time
-	oldestNewerTimestamp time.Time
-}
-
-// Return the latest timestamp
-func latestTimestamp(resultTracks []Track) time.Time {
-	var latestTimestamp time.Time // Create a variable to store the most recent track added
-
-	for _, val := range resultTracks { // Iterate every track to find the most recent track added
-		if val.TimeRecorded.After(latestTimestamp) { // If current track timestamp is after the current latestTimestamp...
-			latestTimestamp = val.TimeRecorded // Set that one as the latestTimestamp
-		}
-	}
-
-	return latestTimestamp
-}
-
-// Return the oldest timestamp
-func oldestTimestamp(resultTracks []Track) time.Time {
-
-	// Just the first time, add the first found timestamp
-	// After that, check that one against the other timestamps in the slice
-	// If there is none, JSON response will be an empty string ""
-	// If there is one timestamp, that one is the oldest timestamp as well
-
-	var oldestTimestamp time.Time // Create a variable to store the oldest track added
-
-	for key, val := range resultTracks { // Iterate every track to find the oldest track added
-
-		// Assign to oldestTimestamp a value, but just once
-		// Then we check it against other timestamps of other tracks in the slice
-		if key == 0 {
-			oldestTimestamp = val.TimeRecorded
-		}
-
-		if val.TimeRecorded.Before(oldestTimestamp) { // If current track timestamp is before the current latestTimestamp...
-			oldestTimestamp = val.TimeRecorded // Set that one as the latestTimestamp
-		}
-	}
-
-	return oldestTimestamp
-}
-
-// Return the oldest timestamp which is newer than input timestamp
-func oldestNewerTimestamp(inputTS string, resultTracks []Track) time.Time {
-
-	ts := time.Now()
-	testTs := ts
-
-	parsedTime, _ := time.Parse("02.01.2006 15:04:05.000", inputTS) // Parse the string into time
-
-	for _, val := range resultTracks { // Iterate every track to find the most recent track added
-		if val.TimeRecorded.After(parsedTime) && val.TimeRecorded.Before(ts) { // If current track timestamp is after the current latestTimestamp...
-			ts = val.TimeRecorded // Set that one as the latestTimestamp
-		}
-	}
-
-	if testTs.Equal(ts) {
-		return time.Time{}
-	}
-
-	return ts
-}
-
-func tickerTimestamps(inputTS string) Timestamps {
-	conn := mongoConnect()
-	resultTracks := getAllTracks(conn, true)
-
-	timestamps := Timestamps{}
-
-	timestamps.latestTimestamp = latestTimestamp(resultTracks)
-	timestamps.oldestTimestamp = oldestTimestamp(resultTracks)
-	timestamps.oldestNewerTimestamp = oldestNewerTimestamp(inputTS, resultTracks)
-
-	return timestamps
 }
