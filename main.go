@@ -28,6 +28,17 @@ var uniqueId int
 //IgcFiles is a slice for storing igc files
 var igcFiles []Track
 
+type tracks struct {
+	UniqueID     string
+	Pilot        string
+	Glider       string
+	GliderID     string
+	TrackLength  float64
+	Hdate        string
+	Url          string
+	TimeRecorded time.Time
+}
+
 func findIndex(x map[int]string, y int) bool {
 	for k, _ := range x {
 		if k == y {
@@ -119,14 +130,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "404 - Page not found!", http.StatusNotFound)
 
 }
-func handler1(w http.ResponseWriter, r *http.Request) {
+func handlerApi(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	parts := strings.Split(r.URL.Path, "/")
 	//var empty = regexp.MustCompile(``)
 	var api = regexp.MustCompile(`api`)
 
-	//Handling for /igcinfo/api
+	//Handling for /paragliding/api
 	if len(parts) != 3 || !api.MatchString(parts[2]) {
 		http.Error(w, "400 - Bad Request, too many url arguments.", http.StatusBadRequest)
 		return
@@ -135,37 +146,40 @@ func handler1(w http.ResponseWriter, r *http.Request) {
 
 }
 
-//Handling for /igcinfo/api/igc
-func handler2(w http.ResponseWriter, r *http.Request) {
+//Handling for /paragliding/api/track
+func handlerTrack(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	switch r.Method {
-	//Handling GET /igcinfo/api/igc for returning all ids storing in a slice
+	//Handling GET /paragliding/api/track for returning all ids storing in database
 	case http.MethodGet:
-		ids := make([]string, 0)
 
 		client := mongoConnect()
 
-		collection := client.Database("igcFiles").Collection("tracks")
+		//collection := client.Database("igcFiles").Collection("tracks")
 
-		cursor, err := collection.Find(context.Background(), nil, nil)
-		if err != nil {
-			log.Fatal(err)
-		}
-		// 'Close' the cursor
-		defer cursor.Close(context.Background())
-		track := Track{}
+		ids := getTrackID(client)
 
-		// Point the cursor at whatever is found
-		for cursor.Next(context.Background()) {
-			err = cursor.Decode(&track)
-			if err != nil {
-				log.Fatal(err)
-			}
-			ids = append(ids, track.ID)
-		}
+		fmt.Fprint(w, ids)
 
-		json.NewEncoder(w).Encode(ids)
+		// cursor, err := collection.Find(context.Background(), nil, nil)
+		// if err != nil {
+		// 	log.Fatal(err)
+		// }
+		// // 'Close' the cursor
+		// defer cursor.Close(context.Background())
+		// track := Track{}
+
+		// // Point the cursor at whatever is found
+		// for cursor.Next(context.Background()) {
+		// 	err = cursor.Decode(&track)
+		// 	if err != nil {
+		// 		log.Fatal(err)
+		// 	}
+		// 	ids = append(ids, track.ID)
+		// }
+
+		// json.NewEncoder(w).Encode(ids)
 
 	case http.MethodPost:
 
@@ -197,25 +211,35 @@ func handler2(w http.ResponseWriter, r *http.Request) {
 			}
 			//uniqueId = ID
 			//urlMap[uniqueId] = URL.URL
-			igcFile := Track{}
-			igcFile.ID = strconv.Itoa(ID)
-			igcFile.IgcTrack = track
-			igcFile.Url = URL.URL
+			//igcFile := Track{}
+			track.UniqueID = strconv.Itoa(ID)
+			//	igcFile.IgcTrack = track
+			// igcFile.Url = URL.URL
+			trackFile := tracks{}
 
 			timestamp := time.Now().Second()
 			timestamp = timestamp * 1000
-			igcFile.TimeRecorded = time.Now()
+			//	igcFile.TimeRecorded = time.Now()
 
 			client := mongoConnect()
 
 			collection := client.Database("igcFiles").Collection("tracks")
 
 			// Checking for duplicates so that the user doesn't add into the database igc files with the same URL
-			duplicate := urlInMongo(igcFile.Url, collection)
+			duplicate := urlInMongo(URL.URL, collection)
 
 			if !duplicate {
 
-				res, err := collection.InsertOne(context.Background(), igcFile)
+				trackFile = tracks{
+					track.UniqueID,
+					track.Pilot,
+					track.GliderType,
+					track.GliderID,
+					trackLength(track),
+					track.Date.String(),
+					URL.URL, time.Now()}
+
+				res, err := collection.InsertOne(context.Background(), trackFile)
 				if err != nil {
 					log.Fatal(err)
 				}
@@ -227,14 +251,14 @@ func handler2(w http.ResponseWriter, r *http.Request) {
 				}
 
 				// Encoding the ID of the track that was just added to DB
-				json.NewEncoder(w).Encode(igcFile.ID)
+				fmt.Fprint(w, "{\n\"id\":\""+track.UniqueID+"\"\n}")
 
 			} else {
 
-				trackInDB := getTrack(client, igcFile.Url)
+				trackInDB := getTrack(client, URL.URL)
 				// If there is another file in igcFilesDB with that URL return and tell the user that that IGC FILE is already in the database
 				http.Error(w, "409 Conflict - The Igc File you entered is already in our database!", http.StatusConflict)
-				fmt.Fprintln(w, "\nThe file you entered has the following ID: ", trackInDB.ID)
+				fmt.Fprintln(w, "\nThe file you entered has the following ID: ", trackInDB.UniqueID)
 				return
 
 			}
@@ -246,7 +270,7 @@ func handler2(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
-func handler3(w http.ResponseWriter, r *http.Request) {
+func handlerId(w http.ResponseWriter, r *http.Request) {
 	//Handling /igcinfo/api/igc/<id>
 
 	w.Header().Set("Content-Type", "application/json")
@@ -272,7 +296,8 @@ func handler3(w http.ResponseWriter, r *http.Request) {
 	// 'Close' the cursor
 	defer cursor.Close(context.Background())
 
-	track := Track{}
+	track := &tracks{}
+	//URL := &_url{}
 
 	for cursor.Next(context.Background()) {
 		err = cursor.Decode(&track)
@@ -280,12 +305,12 @@ func handler3(w http.ResponseWriter, r *http.Request) {
 			log.Fatal(err)
 		}
 
-		if track.ID == idURL["id"] {
-			attributes.HeaderDate = track.IgcTrack.Header.Date.String()
-			attributes.Pilot = track.IgcTrack.Pilot
-			attributes.Glider = track.IgcTrack.GliderType
-			attributes.GliderID = track.IgcTrack.GliderID
-			attributes.Length = trackLength(track.IgcTrack)
+		if track.UniqueID == idURL["id"] {
+			attributes.HeaderDate = track.Hdate
+			attributes.Pilot = track.Pilot
+			attributes.Glider = track.Glider
+			attributes.GliderID = track.GliderID
+			attributes.Length = track.TrackLength
 			attributes.TrackUrl = track.Url
 
 			json.NewEncoder(w).Encode(attributes)
@@ -298,7 +323,7 @@ func handler3(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func handler4(w http.ResponseWriter, r *http.Request) {
+func handlerField(w http.ResponseWriter, r *http.Request) {
 
 	//Handling for GET /api/igc/<id>/<field>
 	w.Header().Set("Content-Type", "application/json")
@@ -322,36 +347,63 @@ func handler4(w http.ResponseWriter, r *http.Request) {
 
 	defer cursor.Close(context.Background())
 
-	track := Track{}
-
+	// track := Track{}
+	track := &tracks{}
 	for cursor.Next(context.Background()) {
 		err = cursor.Decode(&track)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		if track.ID == urlFields["id"] {
-			switch {
-			case urlFields["field"] == "pilot":
-				json.NewEncoder(w).Encode(track.IgcTrack.Pilot)
-			case urlFields["field"] == "glider":
-				json.NewEncoder(w).Encode(track.IgcTrack.GliderType)
+		if track.UniqueID == urlFields["id"] {
 
-			case urlFields["field"] == "glider_id":
-				json.NewEncoder(w).Encode(track.IgcTrack.GliderID)
+			// Mapping the track info into a Map
+			fields := map[string]string{
+				"pilot":         track.Pilot,
+				"glider":        track.Glider,
+				"glider_id":     track.GliderID,
+				"track_length":  FloatToString(track.TrackLength), // Calculate the track field for the specific track and convertin it to String
+				"h_date":        track.Hdate,
+				"track_src_url": track.Url,
+			}
 
-			case urlFields["field"] == "track_length":
-				json.NewEncoder(w).Encode(FloatToString(trackLength(track.IgcTrack)))
+			// Taking the field variable from the URL path and converting it to lower case to skip some potential errors
+			field := urlFields["field"]
+			field = strings.ToLower(field)
 
-			case urlFields["field"] == "h_date":
-				json.NewEncoder(w).Encode(track.IgcTrack.Header.Date.String())
-			case urlFields["field"] == "track_src_url":
-				json.NewEncoder(w).Encode(track.Url)
-
-			default:
+			// Searching into the map created above for the specific field that was requested
+			if fieldData, ok := fields[field]; ok {
+				// Encoding the data contained in the specific field saved in the map
+				json.NewEncoder(w).Encode(fieldData)
+				return
+			} else {
+				// If there is not a field like the one entered by the user. the user gets this error:
 				http.Error(w, "400 - Bad Request, the field you entered is not on our database!", http.StatusBadRequest)
 				return
 			}
+			// switch {
+			// case urlFields["field"] == "pilot":
+			// 	json.NewEncoder(w).Encode(track.Pilot)
+
+			// case urlFields["field"] == "glider":
+			// 	json.NewEncoder(w).Encode(track.Glider)
+
+			// case urlFields["field"] == "glider_id":
+			// 	json.NewEncoder(w).Encode(track.GliderID)
+
+			// case urlFields["field"] == "track_length":
+			// 	json.NewEncoder(w).Encode(track.TrackLength)
+
+			// case urlFields["field"] == "h_date":
+			// 	json.NewEncoder(w).Encode(track.Hdate)
+
+			// case urlFields["field"] == "track_src_url":
+			// 	json.NewEncoder(w).Encode(track.Url)
+
+			// default:
+			// 	http.Error(w, "400 - Bad Request, the field you entered is not on our database!", http.StatusBadRequest)
+
+			// }
 
 		} else {
 			http.Error(w, "400 - Bad Request, the field you entered is not on our database!", http.StatusBadRequest)
@@ -364,10 +416,10 @@ func handler4(w http.ResponseWriter, r *http.Request) {
 func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/paragliding", handler)
-	r.HandleFunc("/paragliding/api", handler1)
-	r.HandleFunc("/paragliding/api/track", handler2)
-	r.HandleFunc("/paragliding/api/track/{id}", handler3)
-	r.HandleFunc("/paragliding/api/track/{id}/{field}", handler4)
+	r.HandleFunc("/paragliding/api", handlerApi)
+	r.HandleFunc("/paragliding/api/track", handlerTrack)
+	r.HandleFunc("/paragliding/api/track/{id}", handlerId)
+	r.HandleFunc("/paragliding/api/track/{id}/{field}", handlerField)
 	r.HandleFunc("/paragliding/api/ticker/latest", getApiTickerLatest)
 	r.HandleFunc("/paragliding/api/ticker/", getApiTicker)
 	r.HandleFunc("/paragliding/api/ticker/{timestamp}", getApiTickerTimestamp)

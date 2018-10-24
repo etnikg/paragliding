@@ -34,7 +34,7 @@ func urlInMongo(url string, trackColl *mongo.Collection) bool {
 		log.Fatal(err)
 	}
 
-	// 'Close' the cursor
+	// 'Close' the (cursor A pointer to the result set of a query. Clients can iterate through a cursor to retrieve results).
 	defer cursor.Close(context.Background())
 
 	track := Track{}
@@ -54,18 +54,17 @@ func urlInMongo(url string, trackColl *mongo.Collection) bool {
 }
 
 // Get track
-func getTrack(client *mongo.Client, url string) Track {
+func getTrack(client *mongo.Client, url string) tracks {
 	db := client.Database("igcFiles")     // `paragliding` Database
 	collection := db.Collection("tracks") // `track` Collection
 
-	cursor, err := collection.Find(context.Background(),
-		bson.NewDocument(bson.EC.String("url", url)))
+	cursor, err := collection.Find(context.Background(), bson.NewDocument(bson.EC.String("url", url)))
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	resTrack := Track{}
+	resTrack := tracks{}
 
 	for cursor.Next(context.Background()) {
 		err := cursor.Decode(&resTrack)
@@ -76,6 +75,42 @@ func getTrack(client *mongo.Client, url string) Track {
 
 	return resTrack
 
+}
+
+//FUnction that returns ids from database
+
+func getTrackID(client *mongo.Client) string {
+
+	db := client.Database("igcFiles")     // `paragliding` Database
+	collection := db.Collection("tracks") // `track` Collection
+
+	cursor, err := collection.Find(context.Background(), nil)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	resTrack := tracks{}
+	length, error := collection.Count(context.Background(), nil)
+	if error != nil {
+		log.Fatal(error)
+	}
+	ids := "["
+	i := int64(0)
+	for cursor.Next(context.Background()) {
+		err := cursor.Decode(&resTrack)
+		if err != nil {
+			log.Fatal(err)
+		}
+		ids += resTrack.UniqueID
+		if i == length-1 {
+			break
+		}
+		ids += ","
+		i++
+	}
+	ids += "]"
+	return ids
 }
 
 // Delete all tracks
@@ -105,6 +140,7 @@ func countAllTracks(client *mongo.Client) int64 {
 
 // Return track names
 // And also t_stop track
+
 func returnTracks(n int) (string, time.Time) {
 	var response string
 	var tStop time.Time
