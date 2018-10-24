@@ -22,7 +22,7 @@ type Timestamps struct {
 }
 
 // Return the latest timestamp
-func latestTimestamp(resultTracks []Track) time.Time {
+func latestTimestamp(resultTracks []tracks) time.Time {
 	var latestTimestamp time.Time // Create a variable to store the most recent track added
 
 	for _, val := range resultTracks { // Iterate every track to find the most recent track added
@@ -35,7 +35,7 @@ func latestTimestamp(resultTracks []Track) time.Time {
 }
 
 // Return the oldest timestamp
-func oldestTimestamp(resultTracks []Track) time.Time {
+func oldestTimestamp(resultTracks []tracks) time.Time {
 
 	// Just the first time, add the first found timestamp
 	// After that, check that one against the other timestamps in the slice
@@ -61,7 +61,7 @@ func oldestTimestamp(resultTracks []Track) time.Time {
 }
 
 // Return the oldest timestamp which is newer than input timestamp
-func oldestNewerTimestamp(inputTS string, resultTracks []Track) time.Time {
+func oldestNewerTimestamp(inputTS string, resultTracks []tracks) time.Time {
 
 	ts := time.Now()
 	testTs := ts

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"net/http"
 	"strings"
 	"time"
 
@@ -71,6 +72,20 @@ func getTrack(client *mongo.Client, url string) tracks {
 		if err != nil {
 			log.Fatal(err)
 		}
+	}
+
+	return resTrack
+
+}
+
+func getTrack1(client *mongo.Client, id string, w http.ResponseWriter) tracks {
+	db := client.Database("igcFiles")     // `paragliding` Database
+	collection := db.Collection("tracks") // `track` Collection
+	filter := bson.NewDocument(bson.EC.String("uniqueid", ""+id+""))
+	resTrack := tracks{}
+	err := collection.FindOne(context.Background(), filter).Decode(&resTrack)
+	if err != nil {
+		http.Error(w, "File not found!", 404)
 	}
 
 	return resTrack
@@ -150,7 +165,7 @@ func returnTracks(n int) (string, time.Time) {
 	resultTracks := getAllTracks(conn, true)
 
 	for key, val := range resultTracks { // Go through the slice
-		response += `"` + val.ID + `",`
+		response += `"` + val.UniqueID + `",`
 		if key == n-1 || key == len(resultTracks)-1 {
 			tStop = val.TimeRecorded
 			break
@@ -238,7 +253,7 @@ func increaseTrackCounter(cnt int32, db *mongo.Database) {
 }
 
 // Get all tracks
-func getAllTracks(client *mongo.Client, points bool) []Track {
+func getAllTracks(client *mongo.Client, points bool) []tracks {
 	db := client.Database("igcFiles")     // `paragliding` Database
 	collection := db.Collection("tracks") // `track` Collection
 
@@ -265,8 +280,8 @@ func getAllTracks(client *mongo.Client, points bool) []Track {
 
 	defer cursor.Close(context.Background())
 
-	resTracks := []Track{}
-	resTrack := Track{}
+	resTracks := []tracks{}
+	resTrack := tracks{}
 
 	for cursor.Next(context.Background()) {
 		err := cursor.Decode(&resTrack)

@@ -296,7 +296,7 @@ func handlerId(w http.ResponseWriter, r *http.Request) {
 	// 'Close' the cursor
 	defer cursor.Close(context.Background())
 
-	track := &tracks{}
+	track := tracks{}
 	//URL := &_url{}
 
 	for cursor.Next(context.Background()) {
@@ -332,85 +332,46 @@ func handlerField(w http.ResponseWriter, r *http.Request) {
 
 	var rNum, _ = regexp.Compile(`[a-zA-Z_]+`)
 
+	//attributes := &Attributes{}
+
+	// Regular Expression for IDs
+
+	regExId, _ := regexp.Compile("[0-9]+")
+
+	if !regExId.MatchString(urlFields["id"]) {
+		http.Error(w, "400 - Bad Request, you entered an invalid ID in URL.", http.StatusBadRequest)
+		return
+	}
+
 	if !rNum.MatchString(urlFields["field"]) {
 		http.Error(w, "400 - Bad Request, wrong parameters", http.StatusBadRequest)
 		return
 	}
 	client := mongoConnect()
-
-	collection := client.Database("igcFiles").Collection("tracks")
-
-	cursor, err := collection.Find(context.Background(), nil, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer cursor.Close(context.Background())
-
 	// track := Track{}
-	track := &tracks{}
-	for cursor.Next(context.Background()) {
-		err = cursor.Decode(&track)
-		if err != nil {
-			log.Fatal(err)
-		}
+	trackDB := tracks{}
 
-		if track.UniqueID == urlFields["id"] {
+	trackDB = getTrack1(client, urlFields["id"], w)
+	// Taking the field variable from the URL path and converting it to lower case to skip some potential errors
+	field := urlFields["field"]
 
-			// Mapping the track info into a Map
-			fields := map[string]string{
-				"pilot":         track.Pilot,
-				"glider":        track.Glider,
-				"glider_id":     track.GliderID,
-				"track_length":  FloatToString(track.TrackLength), // Calculate the track field for the specific track and convertin it to String
-				"h_date":        track.Hdate,
-				"track_src_url": track.Url,
-			}
-
-			// Taking the field variable from the URL path and converting it to lower case to skip some potential errors
-			field := urlFields["field"]
-			field = strings.ToLower(field)
-
-			// Searching into the map created above for the specific field that was requested
-			if fieldData, ok := fields[field]; ok {
-				// Encoding the data contained in the specific field saved in the map
-				json.NewEncoder(w).Encode(fieldData)
-				return
-			} else {
-				// If there is not a field like the one entered by the user. the user gets this error:
-				http.Error(w, "400 - Bad Request, the field you entered is not on our database!", http.StatusBadRequest)
-				return
-			}
-			// switch {
-			// case urlFields["field"] == "pilot":
-			// 	json.NewEncoder(w).Encode(track.Pilot)
-
-			// case urlFields["field"] == "glider":
-			// 	json.NewEncoder(w).Encode(track.Glider)
-
-			// case urlFields["field"] == "glider_id":
-			// 	json.NewEncoder(w).Encode(track.GliderID)
-
-			// case urlFields["field"] == "track_length":
-			// 	json.NewEncoder(w).Encode(track.TrackLength)
-
-			// case urlFields["field"] == "h_date":
-			// 	json.NewEncoder(w).Encode(track.Hdate)
-
-			// case urlFields["field"] == "track_src_url":
-			// 	json.NewEncoder(w).Encode(track.Url)
-
-			// default:
-			// 	http.Error(w, "400 - Bad Request, the field you entered is not on our database!", http.StatusBadRequest)
-
-			// }
-
-		} else {
-			http.Error(w, "400 - Bad Request, the field you entered is not on our database!", http.StatusBadRequest)
-			return
-		}
-
+	switch field {
+	case "pilot":
+		fmt.Fprint(w, trackDB.Pilot)
+	case "glider":
+		fmt.Fprint(w, trackDB.Glider)
+	case "glider_id":
+		fmt.Fprint(w, trackDB.GliderID)
+	case "h_date":
+		fmt.Fprint(w, trackDB.Hdate)
+	case "track_length":
+		fmt.Fprint(w, trackDB.TrackLength)
+	case "track_src_url":
+		fmt.Fprint(w, trackDB.Url)
+	default:
+		http.Error(w, "", 404)
 	}
+
 }
 
 func main() {
