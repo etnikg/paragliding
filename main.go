@@ -384,6 +384,15 @@ func main() {
 	r.HandleFunc("/paragliding/api/ticker/latest", getApiTickerLatest)
 	r.HandleFunc("/paragliding/api/ticker/", getApiTicker)
 	r.HandleFunc("/paragliding/api/ticker/{timestamp}", getApiTickerTimestamp)
+	// Paths for WebhookAPI
+	r.HandleFunc("/paragliding/api/webhook/new_track/", webhookNewTrack)
+	r.HandleFunc("/paragliding/api/webhook/new_track/{webhook_id}", webhookID)
+
+	// Paths for AdminAPI
+	r.HandleFunc("/paragliding/admin/api/tracks_count", adminAPITracksCount)
+	r.HandleFunc("/paragliding/admin/api/tracks", adminAPITracks)
+
+	r.HandleFunc("/pargliding/admin/api/webhooks", adminAPIWebhookTrigger)
 
 	//fmt.Println("listening...")
 	/*

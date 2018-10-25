@@ -10,7 +10,6 @@ import (
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/bson/objectid"
 	"github.com/mongodb/mongo-go-driver/mongo"
-	"github.com/mongodb/mongo-go-driver/mongo/findopt"
 )
 
 // *** DB METHODS *** //
@@ -87,7 +86,6 @@ func getTrack1(client *mongo.Client, id string, w http.ResponseWriter) tracks {
 	if err != nil {
 		http.Error(w, "File not found!", 404)
 	}
-
 	return resTrack
 
 }
@@ -162,7 +160,7 @@ func returnTracks(n int) (string, time.Time) {
 
 	conn := mongoConnect()
 
-	resultTracks := getAllTracks(conn, true)
+	resultTracks := getAllTracks(conn)
 
 	for key, val := range resultTracks { // Go through the slice
 		response += `"` + val.UniqueID + `",`
@@ -253,7 +251,7 @@ func increaseTrackCounter(cnt int32, db *mongo.Database) {
 }
 
 // Get all tracks
-func getAllTracks(client *mongo.Client, points bool) []tracks {
+func getAllTracks(client *mongo.Client) []tracks {
 	db := client.Database("igcFiles")     // `paragliding` Database
 	collection := db.Collection("tracks") // `track` Collection
 
@@ -263,16 +261,8 @@ func getAllTracks(client *mongo.Client, points bool) []tracks {
 	// If points boolean is true
 	// Get the points for the track also
 	// Otherwise don't
-	if points {
-		cursor, err = collection.Find(context.Background(), nil)
-	} else {
-		projection := findopt.Projection(bson.NewDocument(
-			bson.EC.Int32("trackpoints", 0),
-			bson.EC.Int32("_id", 0),
-		))
 
-		cursor, err = collection.Find(context.Background(), nil, projection)
-	}
+	cursor, err = collection.Find(context.Background(), nil)
 
 	if err != nil {
 		log.Fatal(err)

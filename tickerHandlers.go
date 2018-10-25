@@ -83,7 +83,7 @@ func oldestNewerTimestamp(inputTS string, resultTracks []tracks) time.Time {
 
 func tickerTimestamps(inputTS string) Timestamps {
 	conn := mongoConnect()
-	resultTracks := getAllTracks(conn, true)
+	resultTracks := getAllTracks(conn)
 
 	timestamps := Timestamps{}
 
