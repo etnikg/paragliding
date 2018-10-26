@@ -12,7 +12,7 @@ import (
 
 func Test_getAPI_NotImplemented(t *testing.T) {
 	// instantiate mock HTTP server (just for the purpose of testing
-	ts := httptest.NewServer(http.HandlerFunc(handlerApi))
+	ts := httptest.NewServer(http.HandlerFunc(handlerAPI))
 	defer ts.Close()
 
 	//create a request to our mock HTTP server
@@ -65,7 +65,7 @@ func Test_getAPIIgc_NotImplemented(t *testing.T) {
 func Test_getAPIIgcId_NotImplemented(t *testing.T) {
 
 	// instantiate mock HTTP server (just for the purpose of testing
-	ts := httptest.NewServer(http.HandlerFunc(handlerId))
+	ts := httptest.NewServer(http.HandlerFunc(handlerID))
 	defer ts.Close()
 
 	//create a request to our mock HTTP server
@@ -118,7 +118,7 @@ func Test_getAPIIgcField_NotImplemented(t *testing.T) {
 
 func Test_getAPI_MalformedURL(t *testing.T) {
 
-	ts := httptest.NewServer(http.HandlerFunc(handlerApi))
+	ts := httptest.NewServer(http.HandlerFunc(handlerAPI))
 	defer ts.Close()
 
 	testCases := []string{
@@ -166,7 +166,7 @@ func Test_getAPIIgc_MalformedURL(t *testing.T) {
 
 func Test_getAPIIgcId_MalformedURL(t *testing.T) {
 
-	ts := httptest.NewServer(http.HandlerFunc(handlerId))
+	ts := httptest.NewServer(http.HandlerFunc(handlerID))
 	defer ts.Close()
 
 	testCases := []string{

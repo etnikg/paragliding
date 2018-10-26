@@ -47,7 +47,7 @@ func urlInMongo(url string, trackColl *mongo.Collection) bool {
 		}
 	}
 
-	if track.Url == "" { // If there is an empty field, in this case, `url`, it means the track is not on the database
+	if track.URL == "" { // If there is an empty field, in this case, `url`, it means the track is not on the database
 		return false
 	}
 	return true
@@ -178,70 +178,6 @@ type ObjectID [12]byte
 type Counter struct {
 	ID      objectid.ObjectID `bson:"_id"`
 	Counter int               `bson:"counter"`
-}
-
-// Get trackName from URL
-func trackNameFromURL(url string, trackColl *mongo.Collection) string {
-	// Get the trackName
-	cursor, err := trackColl.Find(context.Background(),
-		bson.NewDocument(bson.EC.String("trackurl", url)))
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer cursor.Close(context.Background())
-
-	dbResult := tracks{}
-
-	for cursor.Next(context.Background()) {
-		err = cursor.Decode(&dbResult)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	return dbResult.Url
-}
-
-// Get track counter from DB
-func getTrackCounter(db *mongo.Database) int {
-	counter := db.Collection("counter") // `counter` Collection
-
-	cursor, err := counter.Find(context.Background(), nil)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer cursor.Close(context.Background())
-
-	resCounter := Counter{}
-
-	for cursor.Next(context.Background()) {
-		err := cursor.Decode(&resCounter)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-	return resCounter.Counter
-}
-
-// Increase the track counter
-func increaseTrackCounter(cnt int32, db *mongo.Database) {
-	collection := db.Collection("counter") // `counter` Collection
-
-	// This is the way to update the counter field in the document
-	// Which is storen in the counter collection
-	_, err := collection.UpdateOne(context.Background(), nil,
-		bson.NewDocument(
-			bson.EC.SubDocumentFromElements("$set", bson.EC.Int32("counter", cnt+1)), // Increase the counter by one
-
-		),
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
 // Get all tracks

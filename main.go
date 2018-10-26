@@ -12,10 +12,7 @@ import (
 )
 
 var timeStarted = time.Now()
-var urlMap = make(map[int]string)
-var mapID int
-var initialID int
-var uniqueId int
+var uniqueID int
 
 type tracks struct {
 	UniqueID     string
@@ -24,13 +21,14 @@ type tracks struct {
 	GliderID     string
 	TrackLength  float64
 	Hdate        string
-	Url          string
+	URL          string
 	TimeRecorded time.Time
 }
 
-func FloatToString(input_num float64) string {
-	// to convert a float number to a string
-	return strconv.FormatFloat(input_num, 'f', 4, 64)
+//FloatToString : convert a float number to a string
+func FloatToString(inputNum float64) string {
+
+	return strconv.FormatFloat(inputNum, 'f', 4, 64)
 }
 
 type _url struct {
@@ -75,10 +73,10 @@ func timeSince(t time.Time) string {
 func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/paragliding", handler)
-	r.HandleFunc("/paragliding/api", handlerApi)
+	r.HandleFunc("/paragliding/api", handlerAPI)
 	//Handling Track
 	r.HandleFunc("/paragliding/api/track", handlerTrack)
-	r.HandleFunc("/paragliding/api/track/{id}", handlerId)
+	r.HandleFunc("/paragliding/api/track/{id}", handlerID)
 	r.HandleFunc("/paragliding/api/track/{id}/{field}", handlerField)
 	//Handling ticker
 	r.HandleFunc("/paragliding/api/ticker/latest", getApiTickerLatest)

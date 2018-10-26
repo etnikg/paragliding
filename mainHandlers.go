@@ -24,7 +24,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "404 - Page not found!", http.StatusNotFound)
 
 }
-func handlerApi(w http.ResponseWriter, r *http.Request) {
+func handlerAPI(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	parts := strings.Split(r.URL.Path, "/")
@@ -138,7 +138,7 @@ func handlerTrack(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
-func handlerId(w http.ResponseWriter, r *http.Request) {
+func handlerID(w http.ResponseWriter, r *http.Request) {
 	//Handling /igcinfo/api/igc/<id>
 	if r.Method != "GET" {
 		http.Error(w, "501 - Method not implemented", http.StatusNotImplemented)
@@ -176,12 +176,12 @@ func handlerId(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if track.UniqueID == idURL["id"] {
-			fmt.Fprint(w, "{\n\"H_date\":\""+track.Hdate+"\",\n\"pilot\":\""+track.Pilot+"\",\n\"glider\":\""+track.Glider+"\",\n\"glider_id\":\""+track.GliderID+"\",\n\"length\":\""+FloatToString(track.TrackLength)+"\",\n\"track_src_url\":\""+track.Url+"\"\n}")
-			return
+			fmt.Fprint(w, "{\n\"H_date\":\""+track.Hdate+"\",\n\"pilot\":\""+track.Pilot+"\",\n\"glider\":\""+track.Glider+"\",\n\"glider_id\":\""+track.GliderID+"\",\n\"length\":\""+FloatToString(track.TrackLength)+"\",\n\"track_src_url\":\""+track.URL+"\"\n}")
+
 		} else {
 			//Handling if user type different id from ids stored
 			http.Error(w, "404 - The trackInfo with that id doesn't exists in our database ", http.StatusNotFound)
-			return
+
 		}
 
 	}
@@ -202,9 +202,9 @@ func handlerField(w http.ResponseWriter, r *http.Request) {
 
 	// Regular Expression for IDs
 
-	regExId, _ := regexp.Compile("[0-9]+")
+	regExID, _ := regexp.Compile("[0-9]+")
 
-	if !regExId.MatchString(urlFields["id"]) {
+	if !regExID.MatchString(urlFields["id"]) {
 		http.Error(w, "400 - Bad Request, you entered an invalid ID in URL.", http.StatusBadRequest)
 		return
 	}
@@ -233,7 +233,7 @@ func handlerField(w http.ResponseWriter, r *http.Request) {
 	case "track_length":
 		fmt.Fprint(w, trackDB.TrackLength)
 	case "track_src_url":
-		fmt.Fprint(w, trackDB.Url)
+		fmt.Fprint(w, trackDB.URL)
 	default:
 		http.Error(w, "", 404)
 	}
