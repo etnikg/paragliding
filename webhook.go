@@ -315,30 +315,6 @@ func triggerWhenTrackIsAdded() {
 
 }
 
-// Get the latest webhook in DB
-func getLatestWebhook(client *mongo.Client) Webhook {
-	db := client.Database("igcFiles")
-	collection := db.Collection("webhooks")
-
-	cursor, err := collection.Find(context.Background(), nil)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	resWebhook := Webhook{}
-
-	for cursor.Next(context.Background()) {
-		err := cursor.Decode(&resWebhook)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	return resWebhook
-
-}
-
 // Delete webhook with the ID specified in function parameters
 func deleteWebhook(client *mongo.Client, webhookID string) {
 	db := client.Database("igcFiles")
@@ -478,7 +454,7 @@ func clockTrigger(w http.ResponseWriter, r *http.Request) {
 // Returns the current count of all tracks in the DB
 func adminAPITracksCount(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Set("Content-Type", "application/json")
+	//w.Header().Set("Content-Type", "application/json")
 
 	if r.Method != "GET" {
 		http.Error(w, "501 - Method not implemennted", http.StatusNotImplemented)
@@ -487,14 +463,14 @@ func adminAPITracksCount(w http.ResponseWriter, r *http.Request) {
 
 	client := mongoConnect()
 
-	fmt.Fprintln(w, "Current count of the tracks in DB is: ", countAllTracks(client))
+	fmt.Fprintf(w, "Current count of the tracks in DB is: %d", countAllTracks(client))
 }
 
 // Handles path: DELETE /admin/api/track
 // It only works with DELETE method, and this handler deletes all tracks in the DB
 func adminAPITracks(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Set("Content-Type", "application/json")
+	//w.Header().Set("Content-Type", "application/json")
 
 	if r.Method != "DELETE" {
 		http.Error(w, "501 - Method not implemented", http.StatusNotImplemented)
@@ -504,7 +480,7 @@ func adminAPITracks(w http.ResponseWriter, r *http.Request) {
 	client := mongoConnect()
 
 	// Notifying the admin first for the current count of the track
-	fmt.Fprintln(w, "Count of the tracks removed from DB is: ", countAllTracks(client))
+	fmt.Fprintf(w, "Count of the tracks removed from DB is: %d", countAllTracks(client))
 
 	// Deleting all the track in DB
 	deleteAllTracks(client)

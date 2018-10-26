@@ -37,7 +37,7 @@ func urlInMongo(url string, trackColl *mongo.Collection) bool {
 	// 'Close' the (cursor A pointer to the result set of a query. Clients can iterate through a cursor to retrieve results).
 	defer cursor.Close(context.Background())
 
-	track := Track{}
+	track := tracks{}
 
 	// Point the cursor at whatever is found
 	for cursor.Next(context.Background()) {
@@ -197,7 +197,7 @@ func trackNameFromURL(url string, trackColl *mongo.Collection) string {
 
 	defer cursor.Close(context.Background())
 
-	dbResult := Track{}
+	dbResult := tracks{}
 
 	for cursor.Next(context.Background()) {
 		err = cursor.Decode(&dbResult)
