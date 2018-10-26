@@ -240,9 +240,8 @@ func increaseTrackCounter(cnt int32, db *mongo.Database) {
 	// Which is storen in the counter collection
 	_, err := collection.UpdateOne(context.Background(), nil,
 		bson.NewDocument(
-			bson.EC.SubDocumentFromElements("$set",
-				bson.EC.Int32("counter", cnt+1), // Increase the counter by one
-			),
+			bson.EC.SubDocumentFromElements("$set", bson.EC.Int32("counter", cnt+1)), // Increase the counter by one
+
 		),
 	)
 	if err != nil {

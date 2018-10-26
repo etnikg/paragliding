@@ -89,9 +89,7 @@ func webhookNewTrack(w http.ResponseWriter, r *http.Request) {
 				bson.EC.String("webhookurl", webhook.WebhookURL),
 			),
 			bson.NewDocument(
-				bson.EC.SubDocumentFromElements("$set",
-					bson.EC.Int32("mintriggervalue", webhook.MinTriggerValue),
-				),
+				bson.EC.SubDocumentFromElements("$set", bson.EC.Int32("mintriggervalue", webhook.MinTriggerValue)),
 			),
 		)
 		if err != nil {
@@ -215,7 +213,7 @@ func webhookID(w http.ResponseWriter, r *http.Request) {
 // This function is called whenever a Track is registered in DB
 // The frequency of this function to be triggered depends on the minTriggerValue, which
 // indicates the frequency of updates - after how many tracks the webhook should be called
-func triggerWhenTrackIsAdded(w http.ResponseWriter, r *http.Request) {
+func triggerWhenTrackIsAdded() {
 
 	// Connect to DB
 	clientDB := mongoConnect()
@@ -294,9 +292,9 @@ func triggerWhenTrackIsAdded(w http.ResponseWriter, r *http.Request) {
 			client := &http.Client{}
 
 			// Creating a new POST request to the webhook URL and sending the specified data to be printed in Discord
-			r, err = http.NewRequest("POST", urlStr, strings.NewReader(data.Encode())) // URL-encoded payload
+			r, err := http.NewRequest("POST", urlStr, strings.NewReader(data.Encode())) // URL-encoded payload
 			if err != nil {
-				fmt.Fprintln(w, "Error constructing the POST request, ", err)
+				fmt.Println("Error constructing the POST request, ", err)
 			}
 
 			// Specifying the request header parameters to send the data as JSON
@@ -306,7 +304,7 @@ func triggerWhenTrackIsAdded(w http.ResponseWriter, r *http.Request) {
 
 			resp, err := client.Do(r)
 			if err != nil {
-				fmt.Fprintln(w, "Error executing the POST request, ", err)
+				fmt.Println("Error executing the POST request, ", err)
 			}
 
 			defer resp.Body.Close()

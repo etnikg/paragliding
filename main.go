@@ -253,6 +253,8 @@ func handlerTrack(w http.ResponseWriter, r *http.Request) {
 				// Encoding the ID of the track that was just added to DB
 				fmt.Fprint(w, "{\n\"id\":\""+track.UniqueID+"\"\n}")
 
+				triggerWhenTrackIsAdded()
+
 			} else {
 
 				trackInDB := getTrack(client, URL.URL)
@@ -382,16 +384,12 @@ func main() {
 	r.HandleFunc("/paragliding/api/track/{id}", handlerId)
 	r.HandleFunc("/paragliding/api/track/{id}/{field}", handlerField)
 	r.HandleFunc("/paragliding/api/ticker/latest", getApiTickerLatest)
-	r.HandleFunc("/paragliding/api/ticker/", getApiTicker)
+	r.HandleFunc("/paragliding/api/ticker", getApiTicker)
 	r.HandleFunc("/paragliding/api/ticker/{timestamp}", getApiTickerTimestamp)
-	// Paths for WebhookAPI
 	r.HandleFunc("/paragliding/api/webhook/new_track/", webhookNewTrack)
 	r.HandleFunc("/paragliding/api/webhook/new_track/{webhook_id}", webhookID)
-
-	// Paths for AdminAPI
 	r.HandleFunc("/paragliding/admin/api/tracks_count", adminAPITracksCount)
 	r.HandleFunc("/paragliding/admin/api/tracks", adminAPITracks)
-
 	r.HandleFunc("/pargliding/admin/api/webhooks", adminAPIWebhookTrigger)
 
 	//fmt.Println("listening...")
