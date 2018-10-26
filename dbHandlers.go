@@ -135,11 +135,6 @@ func deleteAllTracks(client *mongo.Client) {
 	collection.DeleteMany(context.Background(), bson.NewDocument())
 }
 
-// *** URANI MONGO *** //
-
-// *** URANI MONGO *** //
-
-// *** URANI MONGO *** //
 // Count all tracks
 func countAllTracks(client *mongo.Client) int64 {
 	db := client.Database("igcFiles")
