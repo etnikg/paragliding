@@ -6,6 +6,8 @@ require (
 	github.com/gorilla/mux v1.6.2
 	github.com/marni/goigc v0.1.0
 	github.com/mongodb/mongo-go-driver v0.0.16
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/stretchr/testify v1.2.2
 	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect
 	github.com/xdg/stringprep v1.0.0 // indirect
 	golang.org/x/crypto v0.0.0-20181015023909-0c41d7ab0a0e // indirect
