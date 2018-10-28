@@ -168,8 +168,7 @@ func webhookID(w http.ResponseWriter, r *http.Request) {
 
 		collection := client.Database("igcFiles").Collection("webhooks")
 
-		cursor, err := collection.Find(context.Background(),
-			bson.NewDocument(bson.EC.String("webhookid", urlVars["webhook_id"])))
+		cursor, err := collection.Find(context.Background(), bson.NewDocument(bson.EC.String("webhookid", urlVars["webhook_id"])))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -321,11 +320,7 @@ func deleteWebhook(client *mongo.Client, webhookID string) {
 	collection := db.Collection("webhooks")
 
 	// Delete the webhook
-	collection.DeleteOne(
-		context.Background(), bson.NewDocument(
-			bson.EC.String("webhookid", webhookID),
-		),
-	)
+	collection.DeleteOne(context.Background(), bson.NewDocument(bson.EC.String("webhookid", webhookID)))
 }
 
 // Get all webhooks
