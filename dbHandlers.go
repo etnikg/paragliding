@@ -16,7 +16,7 @@ import (
 
 func mongoConnect() *mongo.Client {
 	// Connect to MongoDB
-	conn, err := mongo.Connect(context.Background(), "mongodb://localhost:27017", nil)
+	conn, err := mongo.Connect(context.Background(), "mongodb://etnikg:etnik123@ds013405.mlab.com:13405/?authSource=igcfiles", nil)
 	if err != nil {
 		log.Fatal(err)
 		return nil
@@ -55,7 +55,7 @@ func urlInMongo(url string, trackColl *mongo.Collection) bool {
 
 // Get track
 func getTrack(client *mongo.Client, url string) tracks {
-	db := client.Database("igcFiles")     // `paragliding` Database
+	db := client.Database("igcfiles")     // `paragliding` Database
 	collection := db.Collection("tracks") // `track` Collection
 
 	cursor, err := collection.Find(context.Background(), bson.NewDocument(bson.EC.String("url", url)))
@@ -78,7 +78,7 @@ func getTrack(client *mongo.Client, url string) tracks {
 }
 
 func getTrack1(client *mongo.Client, id string, w http.ResponseWriter) tracks {
-	db := client.Database("igcFiles")     // `paragliding` Database
+	db := client.Database("igcfiles")     // `paragliding` Database
 	collection := db.Collection("tracks") // `track` Collection
 	filter := bson.NewDocument(bson.EC.String("uniqueid", ""+id+""))
 	resTrack := tracks{}
@@ -94,7 +94,7 @@ func getTrack1(client *mongo.Client, id string, w http.ResponseWriter) tracks {
 
 func getTrackID(client *mongo.Client) string {
 
-	db := client.Database("igcFiles")     // `paragliding` Database
+	db := client.Database("igcfiles")     // `paragliding` Database
 	collection := db.Collection("tracks") // `track` Collection
 
 	cursor, err := collection.Find(context.Background(), nil)
@@ -128,7 +128,7 @@ func getTrackID(client *mongo.Client) string {
 
 // Delete all tracks
 func deleteAllTracks(client *mongo.Client) {
-	db := client.Database("igcFiles")
+	db := client.Database("igcfiles")
 	collection := db.Collection("tracks")
 
 	// Delete the tracks
@@ -137,7 +137,7 @@ func deleteAllTracks(client *mongo.Client) {
 
 // Count all tracks
 func countAllTracks(client *mongo.Client) int64 {
-	db := client.Database("igcFiles")
+	db := client.Database("igcfiles")
 	collection := db.Collection("tracks")
 
 	// Count the tracks
@@ -182,7 +182,7 @@ type Counter struct {
 
 // Get all tracks
 func getAllTracks(client *mongo.Client) []tracks {
-	db := client.Database("igcFiles")     // `paragliding` Database
+	db := client.Database("igcfiles")     // `paragliding` Database
 	collection := db.Collection("tracks") // `track` Collection
 
 	var cursor mongo.Cursor

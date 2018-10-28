@@ -91,11 +91,11 @@ func main() {
 	r.HandleFunc("/pargliding/admin/api/webhooks", adminAPIWebhookTrigger)
 
 	//fmt.Println("listening...")
-	/*
-		err := http.ListenAndServe(":"+os.Getenv("PORT"), r)
-		if err != nil {
-			log.Fatal("ListenAndServe: ", err)
-		}*/
+
+	/*err := http.ListenAndServe(":"+os.Getenv("PORT"), r)
+	if err != nil {
+		log.Fatal("ListenAndServe: ", err)
+	} */
 
 	if err := http.ListenAndServe(":8080", r); err != nil {
 		log.Fatal(err)

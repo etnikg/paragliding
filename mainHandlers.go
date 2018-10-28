@@ -89,7 +89,7 @@ func handlerTrack(w http.ResponseWriter, r *http.Request) {
 
 			client := mongoConnect()
 
-			collection := client.Database("igcFiles").Collection("tracks")
+			collection := client.Database("igcfiles").Collection("tracks")
 
 			// Checking for duplicates so that the user doesn't add into the database igc files with the same URL
 			duplicate := urlInMongo(URL.URL, collection)
@@ -156,7 +156,7 @@ func handlerID(w http.ResponseWriter, r *http.Request) {
 
 	client := mongoConnect()
 
-	collection := client.Database("igcFiles").Collection("tracks")
+	collection := client.Database("igcfiles").Collection("tracks")
 
 	cursor, err := collection.Find(context.Background(), nil, nil)
 	if err != nil {
