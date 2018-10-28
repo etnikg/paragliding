@@ -1,6 +1,6 @@
 # Paragliding
 
-##GET /api
+## GET /api
 
 
 Meta information about the API in the  application/json type
@@ -15,7 +15,7 @@ where: <uptime> is the current uptime of the service formatted according to Dura
 
 
 
-##POST /api/track
+## POST /api/track
 
 
 Track registration and response type in application/json
@@ -38,7 +38,7 @@ where: <url> represents a normal URL, that would work in a browser, eg: http://s
 
 
 
-##GET /api/track
+## GET /api/track
 
 
 Returns the array of all tracks ids or an empty array if no tracks have been stored yet.
@@ -63,7 +63,7 @@ Response:
 "track_src_url": <the original URL used to upload the track, ie. the URL used with POST>
 }
 
-##GET /api/track/<id>/<field>
+## GET /api/track/<id>/<field>
 
 
 
@@ -95,7 +95,7 @@ Response
 
 
 
-##GET /api/ticker/latest
+## GET /api/ticker/latest
 
 
 Returns the timestamp of the latest added track
@@ -103,7 +103,7 @@ Response: <timestamp> for the latest added track
 
 
 
-##GET /api/ticker/
+## GET /api/ticker/
 
 
 Returns the JSON struct representing the ticker for the IGC tracks. The first track returned should be the oldest. The array of track ids returned should be capped at 5, to emulate "paging" of the responses. 
@@ -119,7 +119,7 @@ Response
 "processing": <time in ms of how long it took to process the request>
 }
 
-##GET /api/ticker/<timestamp>
+## GET /api/ticker/<timestamp>
 
 
 Returns the JSON struct representing the ticker for the IGC tracks. The first returned track should have the timestamp HIGHER than the one provided in the query. 
@@ -134,10 +134,10 @@ Response:
    "processing": <time in ms of how long it took to process the request>
 }
 
-#Webhooks API
+# Webhooks API
 
 
-##POST /api/webhook/new_track/
+## POST /api/webhook/new_track/
 
 Registration of new webhook for notifications about tracks being added to the system. Returns the details about the registration. The webhookURL is required parameter of the request. The minTriggerValue is optional integer, that defaults to 1 if ommited. It indicated the frequency of updates - after how many new tracks the webhook should be called. 
 
@@ -165,7 +165,7 @@ Response
 The response body should contain the id of the created resource (aka webhook registration), as string. Note, the response body will contain only the created id, as string, not the entire path; no json encoding. Response code upon success should be 200 or 201.
 
 
-###Invoking a registered webhook
+### Invoking a registered webhook
 
 When invoking a registered webhook, use POST with the webhookURL and the following payload specification, in human readable format:
 
@@ -196,7 +196,7 @@ Body:
 
 
 
-##GET /api/webhook/new_track/<webhook_id>
+## GET /api/webhook/new_track/<webhook_id>
 
 
 
@@ -214,7 +214,7 @@ Response body
     }
 }
 
-##DELETE /api/webhook/new_track/<webhook_id>
+## DELETE /api/webhook/new_track/<webhook_id>
 
 
 
@@ -232,17 +232,17 @@ Response body:
     }
 }
 
-###Clock trigger
+### Clock trigger
 
 The idea behind the clock is to have a task that happens on regular basis without user interventions. In our case, you will implement a task, that checks every 10min if the number of tracks differs from the previous check, and if it does, it will notify a predefined Slack webhook. The actual webhook can be hardcoded in the system, or configured via some environmental variables - think which solution is better and why. 
 
 
-#Admin API
+# Admin API
 
 Note: The endpoints below should be either not exposed at all, or should be exposed to ADMIN users only. Best practice is to keep them in a completely different API root, prefixed with something unique, or keep the URL different to the publicly exposed API. Here, we are making it extremely simplistic exclusively for testing purposes.
 
 
-##GET /admin/api/tracks_count
+## GET /admin/api/tracks_count
 
 
 What: returns the current count of all tracks in the DB
@@ -252,7 +252,7 @@ Response: current count of the DB records
 
 
 
-##DELETE /admin/api/tracks
+## DELETE /admin/api/tracks
 
 
 What: deletes all tracks in the DB
@@ -262,7 +262,7 @@ Response: count of the DB records removed from DB
 
 
 
-#Resources
+# Resources
 
 
 -Go IGC library
