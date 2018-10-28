@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -667,4 +668,109 @@ func Test_getAPITickerTimestamp(t *testing.T) {
 		return
 	}
 
+}
+
+/////////////////Other testing functions
+
+func Test_latestTimestamp(t *testing.T) {
+	igcTracks := []tracks{
+		tracks{TimeRecorded: time.Date(2018, 4, 25, 12, 32, 1, 0, time.UTC)},
+		tracks{TimeRecorded: time.Now()},
+		tracks{TimeRecorded: time.Date(2019, 4, 25, 12, 32, 1, 0, time.UTC)},
+	}
+
+	latestTS := latestTimestamp(igcTracks)
+	if latestTS != igcTracks[2].TimeRecorded {
+		t.Error("Not the latest timestamp")
+	}
+}
+
+func Test_oldestTimestamp(t *testing.T) {
+	igcTracks := []tracks{
+		tracks{TimeRecorded: time.Date(2018, 4, 25, 12, 32, 1, 0, time.UTC)},
+		tracks{TimeRecorded: time.Now()},
+		tracks{TimeRecorded: time.Date(2019, 4, 25, 12, 32, 1, 0, time.UTC)},
+	}
+
+	oldestTS := oldestTimestamp(igcTracks)
+	if oldestTS != igcTracks[0].TimeRecorded {
+		t.Error("Not the oldest timestamp")
+	}
+}
+
+func Test_oldestNewerTimestamp(t *testing.T) {
+	igcTracks := []tracks{
+		tracks{TimeRecorded: time.Date(2018, 4, 25, 12, 32, 1, 0, time.UTC)},
+		tracks{TimeRecorded: time.Date(2018, 4, 26, 12, 32, 1, 0, time.UTC)},
+		tracks{TimeRecorded: time.Date(2019, 4, 25, 12, 32, 1, 0, time.UTC)},
+	}
+
+	oldestNewTS := oldestNewerTimestamp("25.04.2018 12:34:30.314", igcTracks)
+
+	if oldestNewTS != igcTracks[1].TimeRecorded {
+		t.Error("Not the right timestamp")
+	}
+}
+
+func Test_tickerTimestamps(t *testing.T) {
+	igcTracks := []tracks{
+		tracks{TimeRecorded: time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)},
+	}
+
+	// No connection to the DB :(
+
+	tickerTS := tickerTimestamps("25.04.2018 12:34:30.314")
+
+	if tickerTS.oldestTimestamp != igcTracks[0].TimeRecorded {
+		t.Error("Not the right timestamp")
+	}
+	if tickerTS.oldestNewerTimestamp != igcTracks[0].TimeRecorded {
+		t.Error("Not the right timestamp")
+	}
+	if tickerTS.latestTimestamp != igcTracks[0].TimeRecorded {
+		t.Error("Not the right timestamp")
+	}
+}
+
+/////Mongo tests
+
+func Test_mongoConnect(t *testing.T) {
+	if conn := mongoConnect(); conn == nil {
+		t.Error("No connection")
+	}
+}
+
+func Test_urlInMong(t *testing.T) {
+	urlExists := urlInMongo(`Some random URL`, mongoConnect().Database("paragliding").Collection("track"))
+	if urlExists {
+		t.Error("Track should not exist")
+	}
+}
+
+func Test_getAllTrack(t *testing.T) {
+	allTracks := getAllTracks(mongoConnect())
+
+	if len(allTracks) < 0 {
+		t.Error("It should be bigger")
+	}
+}
+
+func Test_getAllWebhooks(t *testing.T) {
+	allWebhooks := getAllWebhooks(mongoConnect())
+
+	if len(allWebhooks) < 0 {
+		t.Error("It should be bigger")
+	}
+}
+
+func Test_getTrack(t *testing.T) {
+	track := getTrack(mongoConnect(), `url`)
+
+	if track.URL != "" {
+		t.Error("It should be empty")
+	}
+}
+
+func Test_deleteWebhook(t *testing.T) {
+	deleteWebhook(mongoConnect(), `noWebhook`)
 }
