@@ -8,12 +8,6 @@ import (
 	"time" //"path/filepath"
 )
 
-const (
-	gmlOB  = `{`
-	gmlCB  = `}`
-	gmlCPC = `",`
-)
-
 // Timestamps for ticker API struct
 type Timestamps struct {
 	latestTimestamp      time.Time
@@ -127,17 +121,17 @@ func getApiTicker(w http.ResponseWriter, r *http.Request) {
 
 		// timestamps := returnTimestamps(5)
 
-		response := gmlOB
+		response := `{`
 		response += `"t_latest": "`
 		if latestTS.IsZero() {
-			response += gmlCPC
+			response += `",`
 		} else {
 			response += latestTS.Format("02.01.2006 15:04:05.000") + `",`
 		}
 
 		response += `"t_start": "`
 		if oldestTS.IsZero() {
-			response += gmlCPC
+			response += `",`
 		} else {
 			response += oldestTS.Format("02.01.2006 15:04:05.000") + `",`
 		}
@@ -155,7 +149,7 @@ func getApiTicker(w http.ResponseWriter, r *http.Request) {
 
 		response += `],`
 		response += `"processing":` + `"` + strconv.FormatFloat(float64(time.Since(processStart))/float64(time.Millisecond), 'f', 2, 64) + `ms"`
-		response += gmlCB
+		response += `}`
 		fmt.Fprintln(w, response)
 	} else {
 		w.WriteHeader(http.StatusNotFound) // If it isn't, send a 404 Not Found status
@@ -185,17 +179,17 @@ func getApiTickerTimestamp(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("Content-Type", "application/json") // Set response content-type to JSON
 
-		response := gmlOB
+		response := `{`
 		response += `"t_latest": "`
 		if latestTS.IsZero() {
-			response += gmlCPC
+			response += `",`
 		} else {
 			response += latestTS.Format("02.01.2006 15:04:05.000") + `",`
 		}
 
 		response += `"t_start": "`
 		if olderTS.IsZero() {
-			response += gmlCPC
+			response += `",`
 		} else {
 			response += olderTS.Format("02.01.2006 15:04:05.000") + `",`
 		}
@@ -214,7 +208,7 @@ func getApiTickerTimestamp(w http.ResponseWriter, r *http.Request) {
 		response += `],`
 
 		response += `"processing":` + `"` + strconv.FormatFloat(float64(time.Since(processStart))/float64(time.Millisecond), 'f', 2, 64) + `ms"`
-		response += gmlCB
+		response += `}`
 
 		fmt.Fprintln(w, response)
 
