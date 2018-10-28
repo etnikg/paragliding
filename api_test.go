@@ -312,7 +312,7 @@ func Test_mongoConnect(t *testing.T) {
 }
 
 func Test_urlInMong(t *testing.T) {
-	urlExists := urlInMongo(`Some random URL`, mongoConnect().Database("paragliding").Collection("track"))
+	urlExists := urlInMongo(`Some random URL`, mongoConnect().Database("igcfiles").Collection("tracks"))
 	if urlExists {
 		t.Error("Track should not exist")
 	}
