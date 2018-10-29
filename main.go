@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http" //"html/template"
+	"os"
 	"strconv"
 	"time" //"path/filepath"
 
@@ -92,12 +93,12 @@ func main() {
 
 	//fmt.Println("listening...")
 
-	/*err := http.ListenAndServe(":"+os.Getenv("PORT"), r)
+	err := http.ListenAndServe(":"+os.Getenv("PORT"), r)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
-	} */
-
-	if err := http.ListenAndServe(":8080", r); err != nil {
-		log.Fatal(err)
 	}
+
+	/*if err := http.ListenAndServe(":8080", r); err != nil {
+		log.Fatal(err)
+	}*/
 }

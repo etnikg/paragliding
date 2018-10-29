@@ -20,8 +20,13 @@ import (
 func handler(w http.ResponseWriter, r *http.Request) {
 
 	//Handling for /igcinfo and for /<rubbish>
+	if r.Method != "GET" {
+		http.Error(w, "501 - Method not implemented", http.StatusNotImplemented)
+		return
+	}
 
-	http.Error(w, "404 - Page not found!", http.StatusNotFound)
+	// Redirect to /paragliding/api
+	http.Redirect(w, r, "/paragliding/api", 302)
 
 }
 func handlerAPI(w http.ResponseWriter, r *http.Request) {
