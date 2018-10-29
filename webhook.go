@@ -485,5 +485,7 @@ func adminAPITracks(w http.ResponseWriter, r *http.Request) {
 func adminAPIWebhookTrigger(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		clockTrigger(w, r)
+	} else {
+		http.Error(w, "Method not implemented yet", http.StatusNotImplemented)
 	}
 }

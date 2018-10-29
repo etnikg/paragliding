@@ -73,7 +73,7 @@ func Test_tickerTimestamps(t *testing.T) {
 
 func Test_getAPITickerLatest(t *testing.T) {
 	// instantiate mock HTTP server (just for the purpose of testing
-	ts := httptest.NewServer(http.HandlerFunc(getApiTickerLatest))
+	ts := httptest.NewServer(http.HandlerFunc(handlerTickerLatest))
 	defer ts.Close()
 
 	//create a request to our mock HTTP server
@@ -115,7 +115,7 @@ func Test_getAPITickerLatest(t *testing.T) {
 
 func Test_getAPITicker(t *testing.T) {
 	// instantiate mock HTTP server (just for the purpose of testing
-	ts := httptest.NewServer(http.HandlerFunc(getApiTicker))
+	ts := httptest.NewServer(http.HandlerFunc(handlerTicker))
 	defer ts.Close()
 
 	//create a request to our mock HTTP server
@@ -157,7 +157,7 @@ func Test_getAPITicker(t *testing.T) {
 
 func Test_getAPITickerTimestamp(t *testing.T) {
 	// instantiate mock HTTP server (just for the purpose of testing
-	ts := httptest.NewServer(http.HandlerFunc(getApiTickerTimestamp))
+	ts := httptest.NewServer(http.HandlerFunc(handlerTickerTimestamp))
 	defer ts.Close()
 
 	//create a request to our mock HTTP server

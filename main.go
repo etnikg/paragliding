@@ -80,18 +80,16 @@ func main() {
 	r.HandleFunc("/paragliding/api/track/{id}", handlerID)
 	r.HandleFunc("/paragliding/api/track/{id}/{field}", handlerField)
 	//Handling ticker
-	r.HandleFunc("/paragliding/api/ticker/latest", getApiTickerLatest)
-	r.HandleFunc("/paragliding/api/ticker", getApiTicker)
-	r.HandleFunc("/paragliding/api/ticker/{timestamp}", getApiTickerTimestamp)
+	r.HandleFunc("/paragliding/api/ticker/latest", handlerTickerLatest)
+	r.HandleFunc("/paragliding/api/ticker", handlerTicker)
+	r.HandleFunc("/paragliding/api/ticker/{timestamp}", handlerTickerTimestamp)
 	//Handling the webhooks
 	r.HandleFunc("/paragliding/api/webhook/new_track/", webhookNewTrack)
 	r.HandleFunc("/paragliding/api/webhook/new_track/{webhook_id}", webhookID)
 	//Handling the admin part
 	r.HandleFunc("/paragliding/admin/api/tracks_count", adminAPITracksCount)
 	r.HandleFunc("/paragliding/admin/api/tracks", adminAPITracks)
-	r.HandleFunc("/pargliding/admin/api/webhooks", adminAPIWebhookTrigger)
-
-	//fmt.Println("listening...")
+	r.HandleFunc("/paragliding/admin/api/webhooks", adminAPIWebhookTrigger)
 
 	err := http.ListenAndServe(":"+os.Getenv("PORT"), r)
 	if err != nil {

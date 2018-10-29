@@ -190,7 +190,6 @@ func handlerID(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
-	http.Error(w, "404 - The trackInfo with that id doesn't exists in IGC Files", http.StatusNotFound)
 
 }
 

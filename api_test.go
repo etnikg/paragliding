@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_igcInfo(t *testing.T) {
+func Test_handler(t *testing.T) {
 
 	// instantiate mock HTTP server (just for the purpose of testing
 	ts := httptest.NewServer(http.HandlerFunc(handler))
@@ -45,7 +45,7 @@ func Test_igcInfo(t *testing.T) {
 
 }
 
-func Test_getAPI_NotImplemented(t *testing.T) {
+func Test_handlerAPI_NotImplemented(t *testing.T) {
 	// instantiate mock HTTP server (just for the purpose of testing
 	ts := httptest.NewServer(http.HandlerFunc(handlerAPI))
 	defer ts.Close()
@@ -70,7 +70,7 @@ func Test_getAPI_NotImplemented(t *testing.T) {
 	}
 }
 
-func Test_getAPIIgc_NotImplemented(t *testing.T) {
+func Test_handlerTrack_NotImplemented(t *testing.T) {
 
 	// instantiate mock HTTP server (just for the purpose of testing
 	ts := httptest.NewServer(http.HandlerFunc(handlerTrack))
@@ -97,7 +97,7 @@ func Test_getAPIIgc_NotImplemented(t *testing.T) {
 
 }
 
-func Test_getAPIIgcId_NotImplemented(t *testing.T) {
+func Test_handlerId_NotImplemented(t *testing.T) {
 
 	// instantiate mock HTTP server (just for the purpose of testing
 	ts := httptest.NewServer(http.HandlerFunc(handlerID))
@@ -124,7 +124,7 @@ func Test_getAPIIgcId_NotImplemented(t *testing.T) {
 
 }
 
-func Test_getAPIIgcField_NotImplemented(t *testing.T) {
+func Test_handlerField_NotImplemented(t *testing.T) {
 
 	// instantiate mock HTTP server (just for the purpose of testing
 	ts := httptest.NewServer(http.HandlerFunc(handlerField))
@@ -151,7 +151,7 @@ func Test_getAPIIgcField_NotImplemented(t *testing.T) {
 
 }
 
-func Test_getAPI_MalformedURL(t *testing.T) {
+func Test_handlerAPI_MalformedURL(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(handlerAPI))
 	defer ts.Close()
@@ -175,7 +175,7 @@ func Test_getAPI_MalformedURL(t *testing.T) {
 	}
 }
 
-func Test_getAPIIgc_MalformedURL(t *testing.T) {
+func Test_handlerTrack_MalformedURL(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(handlerTrack))
 	defer ts.Close()
@@ -199,7 +199,7 @@ func Test_getAPIIgc_MalformedURL(t *testing.T) {
 	}
 }
 
-func Test_getAPIIgcId_MalformedURL(t *testing.T) {
+func Test_handlerId_MalformedURL(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(handlerID))
 	defer ts.Close()
@@ -223,7 +223,7 @@ func Test_getAPIIgcId_MalformedURL(t *testing.T) {
 	}
 }
 
-func Test_getAPIIgcField_MalformedURL(t *testing.T) {
+func Test_handlerField_MalformedURL(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(handlerField))
 	defer ts.Close()
@@ -247,7 +247,7 @@ func Test_getAPIIgcField_MalformedURL(t *testing.T) {
 	}
 }
 
-func Test_getAPIIgc_Post(t *testing.T) {
+func Test_handlerTrack_Post(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(handlerTrack))
 	defer ts.Close()
@@ -277,7 +277,7 @@ func Test_getAPIIgc_Post(t *testing.T) {
 	}
 
 }
-func Test_getAPIIgc_Post_Empty(t *testing.T) {
+func Test_handlerTrack_Post_Empty(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(handlerTrack))
 	defer ts.Close()

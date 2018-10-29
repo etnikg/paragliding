@@ -88,7 +88,7 @@ func tickerTimestamps(inputTS string) Timestamps {
 	return timestamps
 }
 
-func getApiTickerLatest(w http.ResponseWriter, r *http.Request) {
+func handlerTickerLatest(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodGet { // The request has to be of GET type
 
@@ -106,7 +106,7 @@ func getApiTickerLatest(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func getApiTicker(w http.ResponseWriter, r *http.Request) {
+func handlerTicker(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodGet { // The request has to be of GET type
 
@@ -156,7 +156,7 @@ func getApiTicker(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getApiTickerTimestamp(w http.ResponseWriter, r *http.Request) {
+func handlerTickerTimestamp(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodGet { // The request has to be of GET type
 
