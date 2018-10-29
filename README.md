@@ -1,4 +1,11 @@
-# Paragliding
+# Paragliding- igc file viewer API
+
+This api is an online service that will allow users to browse information about IGC files. IGC is an international file format for soaring track files that are used by paragliders and gliders. The program will store IGC files metadata in a NoSQL Database (persistent storage). The system will generate events and it will monitor for new events happening from the outside services. These files can be browsed later by entering the specific URL paths defined later in this README.
+
+For the development of the IGC processing, I have been using the open source IGC library for Go: goigc
+
+## Getting Started
+The project's name is paragliding. The root of the Igc Api is /paragliding/ which if you enter that path you get redirected to the /paragliding/api path. From that root you can write the other paths to get results.
 
 ## GET /api
 
