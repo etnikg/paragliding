@@ -273,4 +273,8 @@ Response: count of the DB records removed from DB
 
 
 -Go IGC library
+
 -official MongoDB Go driver
+
+# Deployment
+This API has been deployed in heroku: https://igcinfo-imt2681.herokuapp.com/paragliding . The clock triggern has been deployed in OpenStack and it has these floating IPs: 10.212.138.136
